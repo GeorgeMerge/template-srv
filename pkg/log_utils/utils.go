@@ -4,13 +4,13 @@ import "log/slog"
 
 func MapSlogLevel(str string) slog.Level {
 	switch str {
-	case "debug":
+	case "DEBUG":
 		return slog.LevelDebug
-	case "info":
+	case "INFO":
 		return slog.LevelInfo
-	case "warn":
+	case "WARN":
 		return slog.LevelWarn
-	case "error":
+	case "ERROR":
 		return slog.LevelError
 	}
 

@@ -6,7 +6,7 @@ import (
 	"github.com/caarlos0/env/v10"
 )
 
-var envPrefix = "EVENTS_"
+var envPrefix = "TMPL_SRV_"
 
 type (
 	Config struct {

@@ -4,10 +4,13 @@ import (
 	"context"
 	"log/slog"
 
-	"eventsv1/internal/config"
-	"eventsv1/pkg/httpserver"
+	"template-srv/internal/config"
+	"template-srv/internal/transport/http"
+	"template-srv/internal/transport/http/ping"
+	"template-srv/pkg/httpserver"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type App struct {
@@ -16,18 +19,28 @@ type App struct {
 	httpserver *httpserver.Server
 }
 
-func New(log *slog.Logger, appCfg config.App) *App {
-	return &App{
+func New(log *slog.Logger, appCfg config.App) (*App, error) {
+	a := &App{
 		log: log,
 		cfg: appCfg,
 	}
+
+	if err := a.init(context.Background()); err != nil {
+		return nil, err
+	}
+
+	return a, nil
 }
 
-func (a *App) Init(ctx context.Context) error {
-	router := echo.New()
-	a.httpserver = httpserver.New(ctx, router, a.cfg.HTTP.Port)
+func (a *App) Run(ctx context.Context) chan error {
+	errCh := make(chan error, 1)
 
-	return nil
+	go func() {
+		defer close(errCh)
+		errCh <- a.httpserver.ListenAndServe()
+	}()
+
+	return errCh
 }
 
 func (a *App) GracefulShutdown(ctx context.Context) error {
@@ -40,4 +53,45 @@ func (a *App) GracefulShutdown(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (a *App) init(ctx context.Context) error {
+	router := echo.New()
+
+	a.registerMiddlewares(router)
+	a.registerHandlers(router)
+	a.httpserver = httpserver.New(ctx, router, a.cfg.HTTP.Port)
+
+	return nil
+}
+
+func (a *App) registerHandlers(router *echo.Echo) {
+	registrars := []http.EchoRegistrar{
+		ping.NewHandler(),
+	}
+
+	for _, registrar := range registrars {
+		registrar.Register(router)
+	}
+}
+
+func (a *App) registerMiddlewares(router *echo.Echo) {
+	skipper := func(c echo.Context) bool {
+		paths := map[string]any{
+			// list uris to skip logging
+		}
+
+		_, ok := paths[c.Request().URL.Path]
+		return ok
+	}
+
+	router.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogStatus: true,
+		LogURI:    true,
+		Skipper:   skipper,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			a.log.Info("request", "uri", v.URI, "status", v.Status)
+			return nil
+		},
+	}))
 }

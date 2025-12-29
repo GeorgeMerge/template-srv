@@ -36,7 +36,7 @@ func main() {
 		}
 	}()
 
-	errCh := application.Run()
+	errCh := application.RunAsync()
 
 	log.Info("service started")
 	defer log.Info("service stopped")

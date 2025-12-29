@@ -32,7 +32,7 @@ func New(log *slog.Logger, appCfg config.App) (*App, error) {
 	return a, nil
 }
 
-func (a *App) Run() chan error {
+func (a *App) RunAsync() chan error {
 	errCh := make(chan error, 1)
 
 	go func() {

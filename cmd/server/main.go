@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"template-srv/pkg/log_utils"
+	"template-srv/pkg/logutils"
 
 	"template-srv/internal/app"
 	"template-srv/internal/config"
@@ -23,20 +23,20 @@ func main() {
 	}
 
 	log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: log_utils.MapSlogLevel(cfg.Logger.Level),
+		Level: logutils.MapSlogLevel(cfg.Logger.Level),
 	}))
 
-	app, err := app.New(log, cfg.App)
+	application, err := app.New(log, cfg.App)
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
-		if err := app.GracefulShutdown(context.WithoutCancel(ctx)); err != nil {
+		if err := application.GracefulShutdown(context.WithoutCancel(ctx)); err != nil {
 			log.Error("failed to shutdown app", "error", err)
 		}
 	}()
 
-	errCh := app.Run(ctx)
+	errCh := application.Run()
 
 	log.Info("service started")
 	defer log.Info("service stopped")

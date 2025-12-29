@@ -1,0 +1,91 @@
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    # Bugs
+    - errcheck
+    - gosec
+    - staticcheck
+    - govet
+    - ineffassign
+    
+    # Style
+    - misspell
+    - unconvert
+    - unparam
+    
+    # Complexity
+    - gocyclo
+    - gocognit
+    
+    # Performance
+    - prealloc
+    
+    # Code quality
+    - revive
+    - gocritic
+    - dupl
+    - unused
+
+  settings:
+    gocyclo:
+      min-complexity: 15
+    
+    gocognit:
+      min-complexity: 20
+    
+    dupl:
+      threshold: 150
+    
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+        - performance
+      disabled-checks:
+        - hugeParam
+    
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+          disabled: true
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: package-comments
+          disabled: true
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unused-parameter
+        - name: unreachable-code
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - gocyclo
+        - gocognit
+    
+    - path: _test\.go
+      text: "Magic number"

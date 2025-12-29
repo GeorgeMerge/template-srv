@@ -1,4 +1,4 @@
-package log_utils
+package logutils
 
 import "log/slog"
 

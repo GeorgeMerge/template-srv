@@ -32,7 +32,7 @@ func New(log *slog.Logger, appCfg config.App) (*App, error) {
 	return a, nil
 }
 
-func (a *App) Run(ctx context.Context) chan error {
+func (a *App) Run() chan error {
 	errCh := make(chan error, 1)
 
 	go func() {
@@ -89,7 +89,7 @@ func (a *App) registerMiddlewares(router *echo.Echo) {
 		LogStatus: true,
 		LogURI:    true,
 		Skipper:   skipper,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+		LogValuesFunc: func(_ echo.Context, v middleware.RequestLoggerValues) error {
 			a.log.Info("request", "uri", v.URI, "status", v.Status)
 			return nil
 		},

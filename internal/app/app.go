@@ -76,6 +76,8 @@ func (a *App) registerHandlers(router *echo.Echo) {
 }
 
 func (a *App) registerMiddlewares(router *echo.Echo) {
+	router.Use(middleware.Recover())
+
 	skipper := func(c echo.Context) bool {
 		paths := map[string]any{
 			// list uris to skip logging

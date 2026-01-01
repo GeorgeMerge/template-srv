@@ -10,8 +10,8 @@ var envPrefix = "TMPL_SRV_"
 
 type (
 	Config struct {
-		Logger Logger `envPrefix:"LOG_"`
-		App    App    `envPrefix:"APP_"`
+		Logger Logger `env:"LOG_"`
+		App    App    `env:"APP_"`
 	}
 
 	Logger struct {
@@ -19,12 +19,13 @@ type (
 	}
 
 	App struct {
-		HTTP HTTPServer `envPrefix:"HTTP_"`
+		HTTP HTTPServer `env:"HTTP_"`
 	}
 
 	HTTPServer struct {
 		Port            int           `env:"PORT" envDefault:"8080"`
 		ShutdownTimeout time.Duration `env:"SHUTDOWN_TIMEOUT" envDefault:"10s"`
+		ReadTimeout     time.Duration `env:"READ_TIMEOUT" envDefault:"30s"`
 	}
 )
 

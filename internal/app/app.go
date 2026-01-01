@@ -2,12 +2,14 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"net"
+	"net/http"
 
 	"template-srv/internal/config"
-	"template-srv/internal/transport/http"
-	"template-srv/internal/transport/http/ping"
-	"template-srv/pkg/httpserver"
+	"template-srv/internal/transport/http/handlers/ping"
+	registrar "template-srv/internal/transport/http/registrar"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,7 +18,7 @@ import (
 type App struct {
 	log        *slog.Logger
 	cfg        config.App
-	httpserver *httpserver.Server
+	httpserver *http.Server
 }
 
 func New(log *slog.Logger, appCfg config.App) (*App, error) {
@@ -60,13 +62,21 @@ func (a *App) init(ctx context.Context) error {
 
 	a.registerMiddlewares(router)
 	a.registerHandlers(router)
-	a.httpserver = httpserver.New(ctx, router, a.cfg.HTTP.Port)
+
+	a.httpserver = &http.Server{
+		Addr:    fmt.Sprintf(":%v", a.cfg.HTTP.Port),
+		Handler: router,
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx
+		},
+		ReadTimeout: a.cfg.HTTP.ReadTimeout,
+	}
 
 	return nil
 }
 
 func (a *App) registerHandlers(router *echo.Echo) {
-	registrars := []http.EchoRegistrar{
+	registrars := []registrar.Echo{
 		ping.NewHandler(),
 	}
 

@@ -1,7 +1,7 @@
-package http
+package registrar
 
 import "github.com/labstack/echo/v4"
 
-type EchoRegistrar interface {
+type Echo interface {
 	Register(router *echo.Echo)
 }

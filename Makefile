@@ -28,7 +28,6 @@ restart: stop run
 clean:
 	docker rmi $(DOCKER_IMAGE) || true
 
-# Linter (install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))
 lint:
 	golangci-lint run ./...
 

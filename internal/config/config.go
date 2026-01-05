@@ -6,7 +6,7 @@ import (
 	"github.com/caarlos0/env/v10"
 )
 
-var envPrefix = "TMPL_SRV_"
+const envPrefix = "TMPL_SRV_"
 
 type (
 	Config struct {
@@ -36,7 +36,9 @@ func New() (*Config, error) {
 	}
 
 	var cfg Config
-	if err := env.ParseWithOptions(&cfg, opts); err != nil {
+
+	err := env.ParseWithOptions(&cfg, opts)
+	if err != nil {
 		return nil, err
 	}
 

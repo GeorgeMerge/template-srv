@@ -7,10 +7,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"template-srv/pkg/logutils"
-
 	"template-srv/internal/app"
 	"template-srv/internal/config"
+	"template-srv/pkg/logutils"
 )
 
 func main() {
@@ -30,9 +29,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	defer func() {
-		if err := application.GracefulShutdown(context.WithoutCancel(ctx)); err != nil {
-			log.Error("failed to shutdown app", "error", err)
+		if shutdownErr := application.GracefulShutdown(context.WithoutCancel(ctx)); shutdownErr != nil {
+			log.Error("failed to shutdown app", "error", shutdownErr)
 		}
 	}()
 
@@ -44,7 +44,7 @@ func main() {
 	select {
 	case <-ctx.Done():
 		log.Info("signal received, shutting down", "reason", ctx.Err())
-	case err := <-errCh:
-		log.Error("http server error", "error", err)
+	case serverErr := <-errCh:
+		log.Error("http server error", "error", serverErr)
 	}
 }
